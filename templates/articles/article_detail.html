@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load crispy_forms_filters %}
+
+{% block title %} {{ object.title }} {% endblock title %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="card" >
+          <div class="card-body">
+              <h1 class="card-title">{{ object.title }}</h1>
+              <h6 class="card-subtitle mb-3 text-muted">
+                  <i class="fa fa-user"></i> {{ object.author }} |
+                  <i class="fa fa-calendar"></i> {{ object.created_at|date:"Y-m-d / H:i" }}
+              </h6>
+              {%  if object.photo %}
+                <img class="card-img-top mb-4" src="{{ object.photo.url }}" alt="{{ object.title }}">
+              {% endif %}
+              <p class="card-text">{{ object.body | safe}}</p>
+              {% if user.is_authenticated and user.is_superuser %}
+                  <a class="btn btn-primary" href="{% url 'article_edit' article.pk %}">
+                      <i class="fa fa-pencil"></i> Tahrirlash
+                  </a>
+                  <a class="btn btn-danger" href="{% url 'article_delete' article.pk %}">
+                      <i class="fa fa-trash"></i> O'chirish
+                  </a>
+              {% endif %}
+              <a class="btn btn-info" href="{% url 'article_list' %}">Barcha postlar</a>
+          </div>
+            <div class="card">
+                <div class="card-header"><i class="fa fa-comments"></i> Izohlar</div>
+                <div class="card-body">
+                    {% for comment in article.comments.all %}
+                        {% if comment.is_active %}
+                        <div class="comment">
+                            <p>
+                                <strong><i class="fa fa-user"></i> {{ comment.author }}</strong>   |
+                                <span class="text-right"><i class="fa fa-clock-o"></i> {{ comment.created_at|date:"Y-m-d / H:i" }}</span>
+                            </p>
+                            <p>{{ comment.comment }}</p><hr>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                    {% if user.is_authenticated %}
+                        <form method="post">
+                            {% csrf_token %}
+                            {{ form|crispy }}
+                            <button type="submit" class="btn btn-success">Izoh qoldirish</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
